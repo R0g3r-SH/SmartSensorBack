@@ -80,14 +80,17 @@ function handleHourDifference(data) {
     for (let i = 0; i < entries.length; i++) {
         const [key, entry] = entries[i];
 
-        if (i < entries.length - 1) {
-            const [nextKey, nextEntry] = entries[i + 1];
+        // Adjust date and hour to be exactly 1 hour earlier
+        const currentDate = new Date(`${entry.date} ${entry.hour}`);
+        const adjustedDate = new Date(currentDate.getTime() - 60 * 60 * 1000);
 
-            if (isOneHourEarlier(entry.date, entry.hour, nextEntry.date, nextEntry.hour)) {
-                // Adjust the date for the next entry
-                nextEntry.date = entry.date;
-            }
+        // Check if the adjusted date is on the previous day
+        if (adjustedDate.getDate() !== currentDate.getDate()) {
+            // If it is, update the date accordingly
+            entry.date = adjustedDate.toLocaleDateString();
         }
+
+        entry.hour = adjustedDate.toLocaleTimeString('en-US', { hour12: false });
 
         processedData[key] = entry;
     }
