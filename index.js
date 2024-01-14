@@ -1,6 +1,9 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const Excel = require('exceljs');
+//add cors
+const cors = require('cors');
+
 require('dotenv').config()
 
 const nodemailer = require('nodemailer');
@@ -10,7 +13,7 @@ admin.initializeApp({
         "type": process.env.TYPE,
         "project_id": process.env.PROJECT_ID,
         "private_key_id": process.env.PRIVATE_KEY_ID,
-        "private_key": process.env.PRIVATE_KEY,
+        "private_key": process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
         "client_email": process.env.CLIENT_EMAIL,
         "client_id": process.env.CLIENT_ID,
         "auth_uri":process.env.AUTH_URI,
@@ -24,6 +27,10 @@ admin.initializeApp({
 
 const db = admin.database();
 const app = express();
+
+//add cors
+app.use(cors());
+
 
 // Your server routes and logic here...
 // get all data from firebase
