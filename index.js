@@ -13,7 +13,7 @@ admin.initializeApp({
         "type": process.env.TYPE,
         "project_id": process.env.PROJECT_ID,
         "private_key_id": process.env.PRIVATE_KEY_ID,
-        "private_key": process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
+        "private_key": process.env.PRIVATE_KEY,
         "client_email": process.env.CLIENT_EMAIL,
         "client_id": process.env.CLIENT_ID,
         "auth_uri":process.env.AUTH_URI,
@@ -34,14 +34,44 @@ app.use(cors());
 
 // Your server routes and logic here...
 // get all data from firebase
+
+
+
 app.get('/api/getAllData', (req, res) => {
     db.ref('/').once('value').then(function (snapshot) {
         const data = snapshot.val();
         const processedData = handleHourDifference(data.DHT);
+        const transformedData = transformData(processedData);
 
-        res.send({ DHT: processedData });
+        res.send({data: transformedData});
     });
 });
+
+function transformData(originalData) {
+    // Extract the DHT data
+    const dhtData = originalData;
+
+    // Remove IDs and create an array of objects
+    const transformedData = Object.values(dhtData).map(item => {
+        return {
+            date: item.date,
+            hour: item.hour,
+            hum: item.hum,
+            temp: item.temp
+        };
+    });
+
+    // Sort the array by date and hour
+    transformedData.sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.hour}`);
+        const dateB = new Date(`${b.date} ${b.hour}`);
+        return dateA - dateB;
+    });
+
+    // Return the result
+    return transformedData;
+}
+
 
 function handleHourDifference(data) {
     const processedData = {};
